@@ -36,20 +36,50 @@ function Markdms()
     function code(input)
     {
         // 获取所有的代码块，存入数组 codeArray
-        var codeArray = input.match(/```[\s\S]*?```/g);
+        var codeArray = input.match(/\n```[\s\S]*?```[\s]{0,}[$\n]/g);
         // 获取所有的非代码块，存入数组 noCodeArray
-        var noCodeArray = input.split(/```[\s\S]*?```/g);
+        var noCodeArray = input.split(/\n```[\s\S]*?```[\s]{0,}[$\n]/g);
         // 假如说存在代码块，则对代码会进行相应的处理
         if (codeArray != null){
             for (var index = 0; index < codeArray.length; index++) {
                 // 获取语言设置
-                var codefirstline = codeArray[index].match(/```.*\n/);
-                var lang = codefirstline[0].replace(/```\s{0,}/,"").replace(/\s{0,}\n/,"");
+                var codefirstline = codeArray[index].match(/\n```.*\n/);
+                var lang = codefirstline[0].replace(/\n```\s{0,}/,"").replace(/\s{0,}\n/,"");
                 // 获取代码块中的代码
-                codeArray[index] = codeArray[index].replace(/```.*\n/,"```");
-                codeArray[index] = codeArray[index].replace(/```([\s\S]*?)\n{0,}```/g,"$1");
+                codeArray[index] = codeArray[index].replace(/\n```.*\n([\s\S]*?)\n```[\s]{0,}[$\n]/g,"$1");
                 // 调用代码高亮函数
                 codeArray[index] = this.codehighlight(codeArray[index],lang);
+            }
+        }
+        // 准备处理所有的行内代码
+        var Reginlincode3 = new RegExp(/```\s{0,}.*\s{0,}```/);
+        var Reginlincode2 = new RegExp(/``\s{0,}.*\s{0,}``/);
+        var Reginlincode1 = new RegExp(/`\s{0,}.*\s{0,}`/);
+        for (var index = 0; index < noCodeArray.length; index++) {
+            // 获取所有的代码块，存入数组 codeArray
+            var inlincodeArray = noCodeArray[index].match(/(```.*```|``.*``|`.*`)/g);
+            // 获取所有的非代码块，存入数组 noCodeArray
+            var noinlineCodeArray = noCodeArray[index].split(/(```.*```|``.*``|`.*`)/g);
+            if (inlincodeArray != null){
+                for (var i = 0; i < inlincodeArray.length; i++) {
+                    if(Reginlincode3.test(inlincodeArray[i])){
+                        inlincodeArray[i] = inlincodeArray[i].replace(/```\s{0,}(.*)\s{0,}```/,"$1");
+                    }else if(Reginlincode2.test(inlincodeArray[i])){
+                        inlincodeArray[i] = inlincodeArray[i].replace(/``\s{0,}(.*)\s{0,}``/,"$1");
+                    }else if(Reginlincode2.test(inlincodeArray[i])){
+                        inlincodeArray[i] = inlincodeArray[i].replace(/`\s{0,}(.*)\s{0,}`/,"$1");
+                    }
+                    inlincodeArray[i] = '<code>'+htmlEncode(inlincodeArray[i])+'</code>';
+                }
+            }
+            noCodeArray[index] = "";
+            for (var i = 0; i < noinlineCodeArray.length; i++) {
+                console.log(noinlineCodeArray[i]);
+                if((i+1)<noinlineCodeArray.length){
+                    noCodeArray[index] += noinlineCodeArray[i]+inlincodeArray[i];
+                }else{
+                    noCodeArray[index] += noinlineCodeArray[i];
+                }
             }
         }
         // 合并字符串并输出
