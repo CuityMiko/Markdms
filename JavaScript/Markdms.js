@@ -52,29 +52,32 @@ function Markdms()
             }
         }
         // 准备处理所有的行内代码
-        var Reginlincode3 = new RegExp(/```\s{0,}.*\s{0,}```/);
-        var Reginlincode2 = new RegExp(/``\s{0,}.*\s{0,}``/);
-        var Reginlincode1 = new RegExp(/`\s{0,}.*\s{0,}`/);
+        var Reginlincode3 = new RegExp(/```.*```/g);
+        var Reginlincode2 = new RegExp(/``.*``/g);
+        var Reginlincode1 = new RegExp(/`.*`/g);
         for (var index = 0; index < noCodeArray.length; index++) {
-            // 获取所有的代码块，存入数组 codeArray
+            // 获取所有的行内代码，存入数组 inlincodeArray
             var inlincodeArray = noCodeArray[index].match(/(```.*```|``.*``|`.*`)/g);
-            // 获取所有的非代码块，存入数组 noCodeArray
-            var noinlineCodeArray = noCodeArray[index].split(/(```.*```|``.*``|`.*`)/g);
+            // 获取所有的不包含行内代码的内容，存入数组 noinlineCodeArray
+            var noinlineCodeArray = noCodeArray[index].replace(/(```.*```|``.*``|`.*`)/g,"```|```").split("```|```");
+            // 如果存在行内代码，则对它进行处理
             if (inlincodeArray != null){
                 for (var i = 0; i < inlincodeArray.length; i++) {
+                    // 提取代码内容
                     if(Reginlincode3.test(inlincodeArray[i])){
                         inlincodeArray[i] = inlincodeArray[i].replace(/```\s{0,}(.*)\s{0,}```/,"$1");
                     }else if(Reginlincode2.test(inlincodeArray[i])){
                         inlincodeArray[i] = inlincodeArray[i].replace(/``\s{0,}(.*)\s{0,}``/,"$1");
-                    }else if(Reginlincode2.test(inlincodeArray[i])){
+                    }else if(Reginlincode1.test(inlincodeArray[i])){
                         inlincodeArray[i] = inlincodeArray[i].replace(/`\s{0,}(.*)\s{0,}`/,"$1");
                     }
+                    // 转换成为 Html 代码
                     inlincodeArray[i] = '<code>'+htmlEncode(inlincodeArray[i])+'</code>';
                 }
             }
+            // 重新组合字符串并存回到原来的变量
             noCodeArray[index] = "";
             for (var i = 0; i < noinlineCodeArray.length; i++) {
-                console.log(noinlineCodeArray[i]);
                 if((i+1)<noinlineCodeArray.length){
                     noCodeArray[index] += noinlineCodeArray[i]+inlincodeArray[i];
                 }else{
