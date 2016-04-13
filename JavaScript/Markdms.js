@@ -2,7 +2,6 @@
 
 function Markdms()
 {
-    // this.firstname=firstname;
     // -------- 代码的处理 --------
     // 下面的函数可以将代码中的特殊字符替换为实体符号
     function htmlEncode(str){
