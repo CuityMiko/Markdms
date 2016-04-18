@@ -2,6 +2,35 @@
 
 function Markdms()
 {
+    // -------- 段落的处理 --------
+    this.paragraph=paragraph;
+    function paragraph(input)
+    {
+        var i,regPar={
+            "ol": /^1\. /g,
+            "ul": /^\* /g,
+            "quote": /^> /g
+        };
+        var parArray = input.split(/\n{2,}/g);
+        var output="";
+        for (var index = 0; index < parArray.length; index++) {
+            var k = 0;
+            for(i in regPar){
+                if(regPar[i].test(parArray[index])){
+                    k = 1;
+                }
+            }
+            if(k==1){
+                    parArray[index] = parArray[index];
+                }else{
+                    parArray[index] = '<p>'+parArray[index]+'</p>';
+                }
+            output += parArray[index];
+        }
+        
+        
+        return output;
+    }
     // -------- 代码的处理 --------
     // 下面的函数可以将代码中的特殊字符替换为实体符号
     function htmlEncode(str){
@@ -83,7 +112,9 @@ function Markdms()
                     noCodeArray[index] += noinlineCodeArray[i];
                 }
             }
+            noCodeArray[index] = this.paragraph(noCodeArray[index]);
         }
+        
         // 合并字符串并输出
         this.output = "";
         for (var index = 0; index < noCodeArray.length; index++) {
@@ -95,16 +126,6 @@ function Markdms()
         }
         return this.output;
     }
-    
-    // 段落的处理
-    this.paragraph=paragraph;
-    function paragraph(input)
-    {
-        this.output = input.replace(/(.*)\n\n/g,"<p>$1</p>");
-        
-        return this.output;
-    }
-    
     // Markdown 文档转换为 Html 代码的方法
     this.Mark2html = Mark2html;
     function Mark2html(input){
